@@ -4,7 +4,7 @@ const TimelineCard = ({ item, index, isMobile }) => {
   if (isMobile) {
     return (
       <div 
-        className="timeline-card relative w-[100%] max-w-[340px] p-6 rounded-[20px] border overflow-hidden text-left"
+        className="timeline-card relative w-[92%] max-w-[360px] p-5 md:p-6 rounded-[20px] border overflow-hidden text-left mx-auto"
         style={{
           background: 'var(--bg-card)',
           borderColor: 'var(--border)',
@@ -12,14 +12,14 @@ const TimelineCard = ({ item, index, isMobile }) => {
         }}
       >
         <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(90deg, #10B981, #0EA5E9)' }} />
-        <h3 className="text-xl font-extrabold mb-2 leading-tight" style={{ color: '#10B981' }}>{item.title}</h3>
-        <p className="text-xs mb-4" style={{ color: 'var(--text-tertiary)' }}>
-          <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{item.company}</span>
+        <h3 className="text-lg md:text-xl font-extrabold mb-1 md:mb-2 leading-tight" style={{ color: '#10B981' }}>{item.title}</h3>
+        <p className="text-xs mb-3 md:mb-4" style={{ color: 'var(--text-tertiary)' }}>
+          <span className="font-bold text-[13px] md:text-sm" style={{ color: 'var(--text-primary)' }}>{item.company}</span>
           <span className="mx-2 opacity-50">|</span> 
           <span className="font-code uppercase tracking-wider">{item.date}</span>
         </p>
         <div className="w-full h-[1px] mb-4" style={{ background: 'var(--border)' }} />
-        <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+        <p className="text-[12px] md:text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           {item.description && item.description.length > 0 ? item.description[0] : item.description}
         </p>
       </div>

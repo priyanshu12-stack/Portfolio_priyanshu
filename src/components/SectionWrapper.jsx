@@ -8,7 +8,7 @@ const SectionWrapper = (Component, idName) => {
       initial="initial"
       whileInView="animate"
       viewport={{ once: true, margin: "-50px" }}
-      className="relative py-16 md:py-24 overflow-hidden"
+      className="relative py-20 md:py-24 overflow-hidden"
       id={idName}
     >
       <div className="max-w-7xl mx-auto px-6">

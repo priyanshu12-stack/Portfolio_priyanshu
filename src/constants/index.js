@@ -17,11 +17,9 @@ export const typingTexts = [
 ]
 
 export const socialLinks = [
-  { name: 'YouTube', url: '#', icon: 'FaYoutube' },
-  { name: 'X', url: 'https://twitter.com/priyanshu12stack', icon: 'FaTwitter' },
-  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/priyanshu-raj-mishra-59ba20316/', icon: 'FaLinkedin' },
-  { name: 'Instagram', url: '#', icon: 'FaInstagram' },
-  { name: 'GitHub', url: 'https://github.com/priyanshu12-stack', icon: 'FaGithub' },
+  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/priyanshu-raj-mishra-59ba20316/', icon: 'FaLinkedin', hoverColor: '#0077B5' },
+  { name: 'GitHub', url: 'https://github.com/priyanshu12-stack', icon: 'FaGithub', hoverColor: '#ffffff' },
+  { name: 'LeetCode', url: 'https://leetcode.com/u/Hhystxn2xX/', icon: 'SiLeetcode', hoverColor: '#FFA116' },
 ]
 
 export const traits = [
@@ -285,7 +283,7 @@ export const personalInfo = {
   currentProject: 'Building travel marketplace @ Explorify Trips',
   githubUsername: 'priyanshu12-stack',
   availability: 'Open to full-time & internship roles',
-  resumeUrl: '/assets/resume.pdf',
+  resumeUrl: 'https://drive.google.com/file/d/1rduo5bCAYAp4x18GODOp8Ht-sMdhq23C/view?usp=sharing',
   phone: '+91-8709020989',
   leetcodeRating: '1600+',
   scholarship: 'GP Birla Scholarship (4x)',

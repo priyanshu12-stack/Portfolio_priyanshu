@@ -1,7 +1,8 @@
-import { FaGithub, FaLinkedin, FaTwitter, FaYoutube, FaInstagram, FaDev } from 'react-icons/fa'
+import { FaGithub, FaLinkedin } from 'react-icons/fa'
+import { SiLeetcode } from 'react-icons/si'
 import { socialLinks, personalInfo } from '@/constants'
 
-const iconMap = { FaGithub, FaLinkedin, FaTwitter, FaYoutube, FaInstagram, FaDev }
+const iconMap = { FaGithub, FaLinkedin, SiLeetcode }
 
 const Footer = () => {
   return (
@@ -31,7 +32,7 @@ const Footer = () => {
 
         {/* Social Icons Flex Centered Tight */}
         <div className="flex items-center justify-center gap-5 md:gap-8 my-1">
-          {socialLinks.map(({ name, url, icon }) => {
+          {socialLinks.map(({ name, url, icon, hoverColor }) => {
             const Icon = iconMap[icon] || FaGithub // Fallback
             return (
               <a
@@ -42,7 +43,7 @@ const Footer = () => {
                 aria-label={name}
                 className="transition-all duration-300 hover:scale-125"
                 style={{ color: 'var(--text-secondary)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#10B981')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = hoverColor)}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
               >
                 <Icon size={20} className="md:w-6 md:h-6" />

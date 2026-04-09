@@ -4,9 +4,18 @@ import { ChevronDown } from 'lucide-react'
 const ScrollIndicator = ({ nextSection }) => {
   const handleClick = () => {
     if (nextSection) {
-      document.getElementById(nextSection)?.scrollIntoView({ behavior: 'smooth' })
+      const el = document.getElementById(nextSection)
+      if (window.__lenis) {
+        window.__lenis.scrollTo(el)
+      } else {
+        el?.scrollIntoView({ behavior: 'smooth' })
+      }
     } else {
-      window.scrollBy({ top: window.innerHeight, behavior: 'smooth' })
+      if (window.__lenis) {
+        window.__lenis.scrollTo(window.scrollY + window.innerHeight)
+      } else {
+        window.scrollBy({ top: window.innerHeight, behavior: 'smooth' })
+      }
     }
   }
 

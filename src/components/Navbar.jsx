@@ -37,7 +37,13 @@ const Navbar = () => {
 
   const scrollTo = (id) => {
     const el = document.getElementById(id)
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
+    if (el) {
+      if (window.__lenis) {
+        window.__lenis.scrollTo(el)
+      } else {
+        el.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
     setMenuOpen(false)
   }
 

@@ -123,7 +123,10 @@ const App = () => {
               exit={{ scale: 0, opacity: 0 }}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              onClick={() => {
+                if (window.__lenis) window.__lenis.scrollTo(0)
+                else window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
               className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg"
               style={{
                 background: 'var(--accent)',

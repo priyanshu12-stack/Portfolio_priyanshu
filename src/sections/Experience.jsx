@@ -5,7 +5,7 @@ import TimelineCard from '@/components/TimelineCard'
 
 const Experience = () => {
   return (
-    <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center py-10 z-10 overflow-hidden" id="experience">
+    <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center py-16 z-10 overflow-hidden" id="experience">
       <style>
         {`
           @keyframes marquee {
@@ -42,7 +42,7 @@ const Experience = () => {
       </div>
 
       {/* Mobile Vertical Stack */}
-      <div className="flex md:hidden flex-col gap-6 w-full items-center z-10 px-6 mt-4 pb-12">
+      <div className="flex md:hidden flex-col gap-10 w-full items-center z-10 px-6 mt-4 pb-24">
         {experiences.map((item, index) => (
           <TimelineCard key={"mob-" + index} item={item} index={index} isMobile={true} />
         ))}

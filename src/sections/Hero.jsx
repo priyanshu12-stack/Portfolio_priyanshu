@@ -1,13 +1,14 @@
 import { useRef, useState, useEffect, lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronDown, Download } from 'lucide-react'
-import { FaGithub, FaLinkedin, FaTwitter, FaDev, FaYoutube, FaInstagram } from 'react-icons/fa'
+import { FaGithub, FaLinkedin } from 'react-icons/fa'
+import { SiLeetcode } from 'react-icons/si'
 import { personalInfo, typingTexts, socialLinks } from '@/constants'
 import Button from '@/components/Button'
 
 const HeroCanvas = lazy(() => import('@/canvas/HeroCanvas'))
 
-const iconMap = { FaGithub, FaLinkedin, FaTwitter, FaDev, FaYoutube, FaInstagram }
+const iconMap = { FaGithub, FaLinkedin, SiLeetcode }
 
 const TypingText = () => {
   const [textIndex, setTextIndex] = useState(0)
@@ -79,7 +80,14 @@ const Hero = () => {
   }
 
   const scrollTo = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    const el = document.getElementById(id)
+    if (el) {
+      if (window.__lenis) {
+        window.__lenis.scrollTo(el)
+      } else {
+        el.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
   }
 
   return (
@@ -148,7 +156,8 @@ const Hero = () => {
             </button>
             <a 
               href={personalInfo.resumeUrl} 
-              download 
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-6 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 hover:scale-105 whitespace-nowrap"
               style={{ color: 'var(--text-primary)', border: '1.5px solid var(--text-tertiary)', background: 'var(--bg-secondary)' }}
             >
@@ -158,7 +167,7 @@ const Hero = () => {
 
           {/* Social Links */}
           <motion.div variants={itemVariant} className="flex items-center gap-6 mt-6">
-            {socialLinks.map(({ name, url, icon }) => {
+            {socialLinks.map(({ name, url, icon, hoverColor }) => {
               const Icon = iconMap[icon] || FaGithub
               return (
                 <a
@@ -169,7 +178,7 @@ const Hero = () => {
                   aria-label={name}
                   className="transition-all duration-300 hover:scale-125"
                   style={{ color: 'var(--text-secondary)' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#10B981')}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = hoverColor)}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
                 >
                   <Icon size={22} />

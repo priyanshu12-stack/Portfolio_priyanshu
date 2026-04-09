@@ -61,7 +61,7 @@ const Contact = () => {
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, margin: "-50px" }}
-      className="w-full min-h-screen relative overflow-hidden flex flex-col items-center justify-center mt-16 md:mt-24"
+      className="w-full min-h-screen relative overflow-hidden flex flex-col items-center justify-center mt-20 md:mt-24"
       style={{ background: 'var(--bg-primary)' }}
     >
       {/* Background Stars - Now guaranteed full screen because no parent container restricts it */}
@@ -69,10 +69,10 @@ const Contact = () => {
 
       {/* Main Section Heading matched to Experience styling */}
       <div className="text-center mb-10 md:mb-20 w-full px-2 md:px-4 shrink-0 z-10 flex flex-col items-center mt-6 md:mt-10">
-        <motion.div variants={fadeIn('up', 0.1)} initial="hidden" whileInView="show" viewport={{ once: true }} className="flex items-center gap-2 md:gap-4 mb-2 md:mb-3">
+        <motion.div variants={fadeIn('up', 0.1)} initial="hidden" whileInView="show" viewport={{ once: true }} className="flex items-center gap-2 md:gap-4 mb-4 md:mb-5">
           <span className="w-6 md:w-16 h-[2px] rounded-full" style={{ background: '#10B981' }} />
-          <h2 className="text-[26px] md:text-5xl font-black uppercase tracking-widest drop-shadow-lg" style={{ color: 'var(--text-primary)' }}>
-            REACH ME <span style={{ color: '#10B981' }}>OUT!!</span>
+          <h2 className="text-2xl md:text-5xl font-black uppercase tracking-widest drop-shadow-lg" style={{ color: 'var(--text-primary)' }}>
+            GET IN <span style={{ color: '#10B981' }}>TOUCH</span>
           </h2>
           <span className="w-6 md:w-16 h-[2px] rounded-full" style={{ background: '#10B981' }} />
         </motion.div>
@@ -108,9 +108,9 @@ const Contact = () => {
         </motion.div>
 
         {/* Right: Contact Form */}
-        <motion.div variants={fadeIn('left', 0.3)} className="w-full">
+        <motion.div variants={fadeIn('left', 0.3)} className="w-[94%] max-w-[500px] md:w-full mx-auto md:mx-0">
           <div 
-            className="p-6 md:p-8 rounded-3xl border w-full backdrop-blur-md"
+            className="p-5 md:p-8 rounded-3xl border w-full backdrop-blur-md"
             style={{ 
               background: 'var(--bg-secondary)', 
               borderColor: 'var(--border)',
@@ -128,8 +128,8 @@ const Contact = () => {
                   <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200 }}>
                     <CheckCircle size={64} style={{ color: '#4ade80' }} />
                   </motion.div>
-                  <h3 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Message Sent! 🎉</h3>
-                  <p style={{ color: 'var(--text-secondary)' }}>I'll get back to you soon.</p>
+                  <h3 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Message Sent Successfully</h3>
+                  <p style={{ color: 'var(--text-secondary)' }}>Thank you for reaching out. I'll get back to you shortly.</p>
                 </motion.div>
               ) : (
                 <motion.form key="form" ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-5" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

@@ -79,14 +79,22 @@ const About = () => {
         {/* Buttons Row */}
         <motion.div variants={fadeIn('up', 0.3)} className="flex justify-center md:justify-start gap-3 md:gap-4">
           <button
-            onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => {
+              const el = document.getElementById('projects')
+              if (window.__lenis) window.__lenis.scrollTo(el)
+              else el?.scrollIntoView({ behavior: 'smooth' })
+            }}
             className="px-6 py-2.5 md:px-8 md:py-3 rounded-lg font-bold transition-transform hover:scale-105 text-sm md:text-base"
             style={{ background: 'var(--text-primary)', color: 'var(--bg-primary)' }}
           >
             View Projects
           </button>
           <button
-            onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => {
+              const el = document.getElementById('contact')
+              if (window.__lenis) window.__lenis.scrollTo(el)
+              else el?.scrollIntoView({ behavior: 'smooth' })
+            }}
             className="px-6 py-2.5 md:px-8 md:py-3 rounded-lg font-bold transition-transform hover:scale-105 border text-sm md:text-base"
             style={{
               background: 'var(--bg-secondary)',

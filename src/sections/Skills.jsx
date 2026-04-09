@@ -21,7 +21,7 @@ const SkillBadge = ({ skill }) => {
       ) : (
         <span style={{ color: skill.color, fontSize: 16 }} className="shrink-0">?</span>
       )}
-      <span className="font-semibold text-[20px] md:text-sm tracking-wide whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
+      <span className="font-semibold text-xs md:text-sm tracking-wide whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
         {skill.name}
       </span>
     </motion.div>
@@ -30,7 +30,7 @@ const SkillBadge = ({ skill }) => {
 
 const Skills = () => {
   return (
-    <div className="relative w-full min-h-[95vh] flex flex-col items-center justify-center py-4 mb-24 md:mb-32 z-10">
+    <div className="relative w-full min-h-[90vh] flex flex-col items-center justify-center pt-24 pb-10 mb-20 md:mb-32 z-10">
       {/* Subtle background glow matching theme */}
       <div 
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[150px] pointer-events-none" 
@@ -44,8 +44,8 @@ const Skills = () => {
         viewport={{ once: true, amount: 0.1 }}
         className="w-full max-w-5xl flex flex-col gap-6 md:gap-10 z-10"
       >
-        <div className="text-center px-2 md:px-4 w-full flex flex-col items-center">
-          <motion.div variants={fadeIn('up', 0.1)} initial="initial" whileInView="animate" viewport={{ once: true }} className="flex items-center gap-2 md:gap-4 mb-3 md:mb-5">
+        <div className="text-center px-2 md:px-4 w-full flex flex-col items-center mb-4 md:mb-0">
+          <motion.div variants={fadeIn('up', 0.1)} initial="initial" whileInView="animate" viewport={{ once: true }} className="flex items-center gap-2 md:gap-4 mb-4 md:mb-5">
             <span className="w-6 md:w-16 h-[2px] rounded-full" style={{ background: '#10B981' }} />
             <h2
               className="text-[28px] md:text-5xl font-black uppercase tracking-widest"

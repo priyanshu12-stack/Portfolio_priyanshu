@@ -22,7 +22,7 @@ const EducationCard = ({ item, index }) => {
   return (
     <motion.div
       variants={cardVariant}
-      className={`relative w-full flex justify-between items-center mb-24 md:mb-[7rem] ${
+      className={`relative w-full flex justify-between items-center md:mb-[7rem] ${
         isLeft ? 'flex-row-reverse' : 'flex-row'
       }`}
     >
@@ -47,7 +47,7 @@ const EducationCard = ({ item, index }) => {
       </div>
 
       {/* Card Content Wrapper */}
-      <div className="w-full md:w-5/12 pl-0 pr-0 md:pl-0 md:pr-0">
+      <div className="w-[92%] max-w-[400px] mx-auto md:mx-0 md:w-5/12 pl-0 pr-0 md:pl-0 md:pr-0">
         <div 
           className="education-card relative p-6 md:p-7 rounded-[20px] border overflow-hidden"
           style={{
@@ -68,10 +68,10 @@ const EducationCard = ({ item, index }) => {
           />
 
           <div className="flex flex-col gap-1 mb-4">
-            <h3 className="text-xl md:text-2xl font-bold tracking-wide" style={{ color: '#10B981' }}>
+            <h3 className="text-lg md:text-2xl font-bold tracking-wide" style={{ color: '#10B981' }}>
               {item.title}
             </h3>
-            <p className="text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+            <p className="text-[13px] md:text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
               {item.institution}
             </p>
             <p className="text-xs tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
@@ -80,8 +80,8 @@ const EducationCard = ({ item, index }) => {
           </div>
 
           <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-            <p className="font-bold text-sm md:text-base" style={{ color: 'var(--text-secondary)' }}>
-              Grade: <span className="px-3 py-1 rounded-full text-xs ml-2 tracking-widest" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>{item.score}</span>
+            <p className="font-bold text-[13px] md:text-base" style={{ color: 'var(--text-secondary)' }}>
+              Grade: <span className="px-3 py-1 rounded-full text-[10px] md:text-xs ml-2 tracking-widest" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>{item.score}</span>
             </p>
           </div>
         </div>
@@ -109,7 +109,7 @@ const Education = () => {
         style={{ background: 'rgba(16, 185, 129, 0.05)' }}
       />
 
-      <div className="text-center mb-16 md:mb-24 w-full px-4 flex flex-col items-center z-10">
+      <div className="text-center mb-20 md:mb-24 w-full px-4 flex flex-col items-center z-10">
         <motion.div variants={fadeIn('up', 0.1)} initial="initial" whileInView="animate" viewport={{ once: true }} className="flex items-center gap-4 mb-4">
           <span className="w-10 md:w-16 h-[2px] rounded-full" style={{ background: '#10B981' }} />
           <h2
@@ -147,7 +147,7 @@ const Education = () => {
               transition: { staggerChildren: 0.5, delayChildren: 0.2 }
             }
           }}
-          className="relative z-10 w-full flex flex-col pt-10"
+          className="relative z-10 w-full flex flex-col gap-12 md:gap-0 pt-10"
         >
           {education.map((item, index) => (
             <EducationCard key={index} item={item} index={index} />
