@@ -5,7 +5,7 @@ import { fadeIn, staggerContainer } from '@/utils/motion'
 
 const About = () => {
   return (
-    <div className="relative w-full min-h-screen flex flex-col items-center justify-center pt-24 pb-12">
+    <div className="relative w-full flex flex-col items-center justify-center py-4 md:py-8">
       {/* Background glowing orbs */}
       <div 
         className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none"
@@ -116,7 +116,7 @@ const About = () => {
               I'm a Software Developer and ECE undergrad at BIT Mesra — passionate about building fast, resilient applications and solving complex algorithmic challenges. 
             </p>
             <p>
-              My coding journey started with competitive programming, where I tackled 500+ DSA problems and earned a 1600+ LeetCode rating. Today, I channel that problem-solving mindset into engineering user-friendly products that make a genuine impact. Currently working as Tech Lead at Explorify Trips, architecting a full-stack travel marketplace.
+              My coding journey started with competitive programming, where I tackled 800+ DSA problems and earned a 1600+ LeetCode rating. Today, I channel that problem-solving mindset into engineering user-friendly products that make a genuine impact. Currently working as Tech Lead at Explorify Trips, architecting a full-stack travel marketplace.
             </p>
           </div>
         </motion.div>

@@ -101,7 +101,7 @@ const Education = () => {
   const height = useTransform(scrollYProgress, [0, 1], ['0%', '100%'])
 
   return (
-    <div className="relative w-full min-h-screen py-20 flex flex-col items-center justify-center overflow-hidden z-10" id="education">
+    <div className="relative w-full flex flex-col items-center justify-center py-4 md:py-8 overflow-hidden z-10">
       
       {/* Background Aura */}
       <div 

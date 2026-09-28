@@ -14,12 +14,12 @@ const SkillBadge = ({ skill }) => {
     <motion.div
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className="skill-badge flex items-center gap-2 px-4 py-2 md:px-4 md:py-2.5 rounded-xl border cursor-pointer"
+      className="skill-badge flex items-center gap-2 px-3.5 py-2 md:px-4 md:py-2.5 rounded-xl border cursor-pointer"
     >
       {Icon ? (
-        <Icon style={{ color: skill.color, fontSize: 20 }} className="shrink-0" />
+        <Icon style={{ color: skill.color || '#10B981', fontSize: 18 }} className="shrink-0" />
       ) : (
-        <span style={{ color: skill.color, fontSize: 16 }} className="shrink-0">?</span>
+        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: skill.color || '#10B981' }} />
       )}
       <span className="font-semibold text-xs md:text-sm tracking-wide whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
         {skill.name}
@@ -30,7 +30,7 @@ const SkillBadge = ({ skill }) => {
 
 const Skills = () => {
   return (
-    <div className="relative w-full min-h-[90vh] flex flex-col items-center justify-center pt-24 pb-10 mb-20 md:mb-32 z-10">
+    <div className="relative w-full flex flex-col items-center justify-center py-4 md:py-8 z-10">
       {/* Subtle background glow matching theme */}
       <div 
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[150px] pointer-events-none" 
@@ -89,8 +89,10 @@ const Skills = () => {
         </div>
       </motion.div>
 
-      {/* Unified Scroll Down Indicator */}
-      <ScrollIndicator nextSection="experience" />
+      {/* Scroll Down Indicator */}
+      <div className="mt-12 flex justify-center">
+        <ScrollIndicator nextSection="experience" />
+      </div>
     </div>
   )
 }
