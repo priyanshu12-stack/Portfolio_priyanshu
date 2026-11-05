@@ -1,36 +1,50 @@
-import { useState, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import emailjs from '@emailjs/browser'
-import { CheckCircle, Send } from 'lucide-react'
-import { fadeIn, staggerContainer } from '@/utils/motion'
+import { ArrowUpRight, CheckCircle2, Loader2 } from 'lucide-react'
+import { FaGithub, FaLinkedinIn } from 'react-icons/fa'
+import { SiLeetcode } from 'react-icons/si'
+import { contactServices, personalInfo } from '@/constants'
+import { Reveal, RevealLines } from '@/components/Reveal'
+
+const channels = [
+  { label: 'Email', value: personalInfo.email, href: `mailto:${personalInfo.email}` },
+  { label: 'LinkedIn', value: 'priyanshu-raj-mishra', href: personalInfo.linkedinUrl, Icon: FaLinkedinIn },
+  { label: 'GitHub', value: personalInfo.githubUsername, href: personalInfo.githubUrl, Icon: FaGithub },
+  { label: 'LeetCode', value: `${personalInfo.dsaCount} solved · ${personalInfo.leetcodeRating}`, href: personalInfo.leetcodeUrl, Icon: SiLeetcode },
+  { label: 'Resume', value: 'View PDF', href: personalInfo.resumeUrl },
+]
+
+const EMPTY = { name: '', email: '', service: '', message: '' }
 
 const Contact = () => {
   const formRef = useRef(null)
-  const [form, setForm] = useState({ name: '', email: '', service: '', message: '' })
+  const [form, setForm] = useState(EMPTY)
   const [errors, setErrors] = useState({})
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [status, setStatus] = useState('idle') // idle | sending | sent
 
   const validate = () => {
     const e = {}
-    if (!form.name || form.name.length < 2) e.name = 'Name must be at least 2 characters.'
-    if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) e.email = 'Please enter a valid email.'
-    if (!form.service) e.service = 'Please select a service.'
-    if (!form.message || form.message.length < 10) e.message = 'Message must be at least 10 characters.'
+    if (form.name.trim().length < 2) e.name = 'Name must be at least 2 characters.'
+    if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Please enter a valid email.'
+    if (!form.service) e.service = 'Please choose a topic.'
+    if (form.message.trim().length < 10) e.message = 'Message must be at least 10 characters.'
     return e
   }
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-    if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: null })
+  const onChange = (e) => {
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
+    if (errors[e.target.name] || errors.submit) setErrors((er) => ({ ...er, [e.target.name]: null, submit: null }))
   }
 
-  const handleSubmit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
     const errs = validate()
-    if (Object.keys(errs).length > 0) { setErrors(errs); return }
-
-    setLoading(true)
+    if (Object.keys(errs).length) {
+      setErrors(errs)
+      return
+    }
+    setStatus('sending')
     try {
       await emailjs.sendForm(
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
@@ -38,171 +52,157 @@ const Contact = () => {
         formRef.current,
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       )
-      setSuccess(true)
+      setStatus('sent')
+      setForm(EMPTY)
     } catch (err) {
       console.error(err)
+      setStatus('idle')
       setErrors({ submit: 'Failed to send message. Please try again or email me directly.' })
-    } finally {
-      setLoading(false)
     }
   }
 
-  const inputClass = `w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all duration-200 bg-transparent`
-  const inputStyle = {
-    background: 'var(--bg-primary)',
-    borderColor: 'var(--border)',
-    color: 'var(--text-primary)',
-  }
+  const fieldProps = (name) => ({
+    id: `f-${name}`,
+    name,
+    value: form[name],
+    onChange,
+    className: `input ${errors[name] ? 'has-error' : ''}`,
+    'aria-invalid': Boolean(errors[name]),
+    'aria-describedby': errors[name] ? `e-${name}` : undefined,
+  })
+
+  const Err = ({ name }) =>
+    errors[name] ? (
+      <span id={`e-${name}`} className="field-error" role="alert">
+        {errors[name]}
+      </span>
+    ) : null
 
   return (
-    <motion.section 
-      id="contact"
-      variants={staggerContainer(0.1, 0.1)}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-50px" }}
-      className="w-full min-h-screen relative overflow-hidden flex flex-col items-center justify-center mt-20 md:mt-24"
-      style={{ background: 'var(--bg-primary)' }}
-    >
-      {/* Background Stars - Now guaranteed full screen because no parent container restricts it */}
-      <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-screen" style={{ backgroundImage: 'radial-gradient(circle at center, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+    <section id="contact" className="contact" aria-labelledby="contact-title">
+      <div className="wrap contact-inner">
+        <Reveal className="section-label" y={12}>
+          <span className="label">
+            <span className="num" style={{ color: 'var(--accent)' }}>06</span> / Contact
+          </span>
+          <span className="availability label">
+            <span className="live-dot" /> {personalInfo.availability}
+          </span>
+        </Reveal>
 
-      {/* Main Section Heading matched to Experience styling */}
-      <div className="text-center mb-10 md:mb-20 w-full px-2 md:px-4 shrink-0 z-10 flex flex-col items-center mt-6 md:mt-10">
-        <motion.div variants={fadeIn('up', 0.1)} initial="hidden" whileInView="show" viewport={{ once: true }} className="flex items-center gap-2 md:gap-4 mb-4 md:mb-5">
-          <span className="w-6 md:w-16 h-[2px] rounded-full" style={{ background: '#10B981' }} />
-          <h2 className="text-2xl md:text-5xl font-black uppercase tracking-widest drop-shadow-lg" style={{ color: 'var(--text-primary)' }}>
-            GET IN <span style={{ color: '#10B981' }}>TOUCH</span>
-          </h2>
-          <span className="w-6 md:w-16 h-[2px] rounded-full" style={{ background: '#10B981' }} />
-        </motion.div>
-      </div>
+        <RevealLines
+          id="contact-title"
+          className="contact-title"
+          lines={[<>Let&rsquo;s build</>, <>something <em>real.</em></>]}
+        />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-7xl w-full mx-auto px-4 md:px-12 items-center relative z-10 pb-16 md:pb-20">
-        
-        {/* Left: Floating Astronaut Illustration */}
-        <motion.div
-          variants={fadeIn('right', 0.2)}
-          className="flex justify-center md:justify-start hidden md:flex"
-        >
-          <motion.div
-            animate={{
-              y: [-15, 15, -15],
-              rotateZ: [-2, 2, -2]
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <img 
-              src="/assets/astronaut.png" 
-              onError={(e) => { 
-                e.target.src = 'https://illustrations.popsy.co/amber/space-travel.svg' 
-              }}
-              alt="Astronaut floating" 
-              className="w-[90%] max-w-[450px] drop-shadow-[0_0_40px_rgba(16,185,129,0.15)] hover:scale-105 hover:-rotate-3 transition-all duration-500"
-            />
-          </motion.div>
-        </motion.div>
+        <Reveal delay={0.1}>
+          <a href={`mailto:${personalInfo.email}`} className="contact-cta">
+            {personalInfo.email} <ArrowUpRight size={26} strokeWidth={1.5} />
+          </a>
+        </Reveal>
 
-        {/* Right: Contact Form */}
-        <motion.div variants={fadeIn('left', 0.3)} className="w-[94%] max-w-[500px] md:w-full mx-auto md:mx-0">
-          <div 
-            className="p-5 md:p-8 rounded-3xl border w-full backdrop-blur-md"
-            style={{ 
-              background: 'var(--bg-secondary)', 
-              borderColor: 'var(--border)',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
-            }}
-          >
-            <AnimatePresence mode="wait">
-              {success ? (
-                <motion.div
-                  key="success"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col items-center justify-center gap-4 py-16 text-center"
+        <div className="contact-grid">
+          <Reveal>
+            <p className="body" style={{ maxWidth: 440, marginBottom: 32 }}>
+              Hiring for a full-stack or backend role, or have a project in mind? Reach out through any channel — I read
+              everything.
+            </p>
+            <div className="contact-links">
+              {channels.map(({ label, value, href, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  className="contact-link"
+                  {...(href.startsWith('mailto') ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
                 >
-                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200 }}>
-                    <CheckCircle size={64} style={{ color: '#4ade80' }} />
-                  </motion.div>
-                  <h3 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Message Sent Successfully</h3>
-                  <p style={{ color: 'var(--text-secondary)' }}>Thank you for reaching out. I'll get back to you shortly.</p>
+                  <span className="label-sm">{label}</span>
+                  <span className="v" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+                    {Icon && <Icon size={14} aria-hidden="true" />}
+                    {value}
+                  </span>
+                  <ArrowUpRight size={16} />
+                </a>
+              ))}
+            </div>
+          </Reveal>
+
+          <Reveal delay={0.1}>
+            <AnimatePresence mode="wait">
+              {status === 'sent' ? (
+                <motion.div
+                  key="sent"
+                  className="form-status"
+                  role="status"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <CheckCircle2 size={22} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    <h3 style={{ fontSize: 22, letterSpacing: '-0.03em' }}>Message sent successfully</h3>
+                    <p className="body" style={{ marginTop: 6 }}>Thank you for reaching out. I&rsquo;ll get back to you shortly.</p>
+                    <button type="button" className="text-link" style={{ marginTop: 18 }} onClick={() => setStatus('idle')}>
+                      Send another <ArrowUpRight size={14} />
+                    </button>
+                  </div>
                 </motion.div>
               ) : (
-                <motion.form key="form" ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-5" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  
-                  {/* Name */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Your Name *</label>
-                    <input name="name" type="text" placeholder="Your Name" value={form.name} onChange={handleChange} className={inputClass} style={{ ...inputStyle, borderColor: errors.name ? '#ef4444' : 'var(--border)' }} />
-                    {errors.name && <span className="text-xs text-red-500">{errors.name}</span>}
-                  </div>
-
-                  {/* Email */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Your Email *</label>
-                    <input name="email" type="email" placeholder="Your Email" value={form.email} onChange={handleChange} className={inputClass} style={{ ...inputStyle, borderColor: errors.email ? '#ef4444' : 'var(--border)' }} />
-                    {errors.email && <span className="text-xs text-red-500">{errors.email}</span>}
-                  </div>
-
-                  {/* Service Needed Dropdown */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Service Needed *</label>
-                    <div className="relative">
-                      <select 
-                        name="service" 
-                        value={form.service} 
-                        onChange={handleChange} 
-                        className={`${inputClass} appearance-none cursor-pointer [&>option]:bg-[#111] dark:[&>option]:bg-[#111] light:[&>option]:bg-white`} 
-                        style={{ ...inputStyle, borderColor: errors.service ? '#ef4444' : 'var(--border)' }}
-                      >
-                        <option value="" disabled style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>Something in mind?</option>
-                        <option value="Full Stack Development" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>Full Stack Development</option>
-                        <option value="Frontend Development" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>Frontend Development</option>
-                        <option value="Backend Integration" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>Backend Integration</option>
-                        <option value="Consulting/Mentoring" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>Consulting/Mentoring</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none" style={{ color: 'var(--text-secondary)' }}>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                      </div>
+                <motion.form
+                  key="form"
+                  ref={formRef}
+                  onSubmit={onSubmit}
+                  className="form"
+                  noValidate
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <span className="label">Or send a message</span>
+                  <div className="field-row">
+                    <div className="field">
+                      <label className="label-sm" htmlFor="f-name">Name</label>
+                      <input type="text" autoComplete="name" placeholder="Your name" {...fieldProps('name')} />
+                      <Err name="name" />
                     </div>
-                    {errors.service && <span className="text-xs text-red-500">{errors.service}</span>}
+                    <div className="field">
+                      <label className="label-sm" htmlFor="f-email">Email</label>
+                      <input type="email" autoComplete="email" placeholder="you@company.com" {...fieldProps('email')} />
+                      <Err name="email" />
+                    </div>
                   </div>
-
-                  {/* Message */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Explain Your Idea *</label>
-                    <textarea name="message" rows={4} placeholder="Explain your idea..." value={form.message} onChange={handleChange} className={inputClass} style={{ ...inputStyle, resize: 'none', borderColor: errors.message ? '#ef4444' : 'var(--border)' }} />
-                    {errors.message && <span className="text-xs text-red-500">{errors.message}</span>}
+                  <div className="field">
+                    <label className="label-sm" htmlFor="f-service">Topic</label>
+                    <select {...fieldProps('service')}>
+                      <option value="" disabled>What&rsquo;s this about?</option>
+                      {contactServices.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <Err name="service" />
                   </div>
-
-                  {errors.submit && <p className="text-sm text-red-500">{errors.submit}</p>}
-
-                  {/* Send Button */}
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="submit"
-                    disabled={loading}
-                    className="mt-2 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white transition-all duration-200 bg-blue-600 hover:bg-blue-500"
-                    style={{
-                      opacity: loading ? 0.7 : 1,
-                      boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)'
-                    }}
-                  >
-                    {loading ? <span className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full" /> : <Send size={18} />}
-                    {loading ? 'Sending...' : 'Send Message'}
-                  </motion.button>
+                  <div className="field">
+                    <label className="label-sm" htmlFor="f-message">Message</label>
+                    <textarea rows={4} placeholder="Tell me about the role or idea…" {...fieldProps('message')} />
+                    <Err name="message" />
+                  </div>
+                  {errors.submit && <span className="field-error" role="alert">{errors.submit}</span>}
+                  <div>
+                    <button type="submit" className="btn btn-primary" disabled={status === 'sending'}>
+                      {status === 'sending' ? (
+                        <>Sending <Loader2 size={16} className="animate-spin" /></>
+                      ) : (
+                        <>Send message <ArrowUpRight size={16} /></>
+                      )}
+                    </button>
+                  </div>
                 </motion.form>
               )}
             </AnimatePresence>
-          </div>
-        </motion.div>
+          </Reveal>
+        </div>
       </div>
-    </motion.section>
+    </section>
   )
 }
 

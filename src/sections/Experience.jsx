@@ -1,84 +1,111 @@
-import { motion } from 'framer-motion'
-import { experiences } from '@/constants'
-import { fadeIn } from '@/utils/motion'
-import TimelineCard from '@/components/TimelineCard'
-import SectionWrapper from '@/components/SectionWrapper'
+import { useRef } from 'react'
+import { motion, useScroll, useSpring } from 'framer-motion'
+import { experiences, impactNumbers } from '@/constants'
+import { Reveal, RevealLines, SectionLabel } from '@/components/Reveal'
 
-const Experience = () => {
-  return (
-    <div className="relative w-full flex flex-col items-center justify-center py-4 md:py-8 z-10 ">
-      <style>
-        {`
-          @keyframes marquee {
-            0% { transform: translateX(0%); }
-            100% { transform: translateX(-50%); }
-          }
-          .animate-marquee {
-            animation: marquee 40s linear infinite;
-          }
-          /* Pause the continuous rotation if the user hovers over the section to read it */
-          .animate-marquee:hover {
-            animation-play-state: paused;
-          }
-        `}
-      </style>
+const splitValue = (v) => {
+  const m = v.match(/^(.*?)([+×%]*|\s?pp)$/)
+  return { num: m[1], suffix: m[2] }
+}
 
-      {/* Subtle background glow mimicking the Hero section */}
-      <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-[150px] pointer-events-none z-0" 
-        style={{ background: 'rgba(16, 185, 129, 0.08)' }}
-      />
-
-      <div className="text-center mb-8 md:mb-12 w-full px-2 md:px-4 shrink-0 z-10 flex flex-col items-center">
-        <motion.div variants={fadeIn('up', 0.1)} initial="initial" whileInView="animate" viewport={{ once: true }} className="flex items-center gap-2 md:gap-4 mb-2 md:mb-3">
-          <span className="w-6 md:w-16 h-[2px] rounded-full" style={{ background: '#10B981' }} />
-          <h2
-            className="text-[25px] md:text-5xl pt-10 font-black uppercase tracking-widest"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            EXPERIENCE
-          </h2>
-          <span className="w-6 md:w-16 h-[2px] rounded-full" style={{ background: '#10B981' }} />
-        </motion.div>
-      </div>
-
-      {/* Mobile Vertical Stack */}
-      <div className="flex md:hidden flex-col gap-10 w-full items-center z-10 px-6 mt-4 pb-24">
-        {experiences.map((item, index) => (
-          <TimelineCard key={"mob-" + index} item={item} index={index} isMobile={true} />
+const ExpRow = ({ exp, index }) => (
+  <motion.article
+    className="exp-row"
+    initial={{ opacity: 0, y: 32 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: '0px 0px -15% 0px' }}
+    transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+  >
+    <motion.span
+      className="exp-node"
+      aria-hidden="true"
+      initial={{ scale: 0.4, backgroundColor: 'var(--bg)' }}
+      whileInView={{ scale: 1, backgroundColor: 'var(--accent)' }}
+      viewport={{ margin: '-45% 0px -45% 0px' }}
+      transition={{ duration: 0.4 }}
+    />
+    <div className="exp-when">
+      <span className="exp-index">{String(index + 1).padStart(2, '0')}</span>
+      <span className="label">{exp.period}</span>
+      <span className="label-sm">{exp.location}</span>
+      {exp.current && (
+        <span className="label-sm current">
+          <span className="live-dot" /> Current
+        </span>
+      )}
+      {exp.stat && (
+        <div className="exp-stat">
+          <strong>{exp.stat[0]}</strong>
+          <span className="label-sm">{exp.stat[1]}</span>
+        </div>
+      )}
+    </div>
+    <div className="exp-role">
+      <span className="exp-kind">{exp.kind}</span>
+      <h3>{exp.role}</h3>
+      <p className="company">{exp.company}</p>
+      {exp.companyNote && <p className="label-sm" style={{ marginTop: 6 }}>{exp.companyNote}</p>}
+      <div className="tag-row">
+        {exp.tags.map((t) => (
+          <span key={t}>{t}</span>
         ))}
       </div>
+    </div>
+    <ul className="exp-points">
+      {exp.points.map((p) => (
+        <li key={p}>{p}</li>
+      ))}
+    </ul>
+  </motion.article>
+)
 
-      {/* Desktop Horizontal auto-scroll marquee container */}
-      <div className="hidden md:flex relative w-full overflow-hidden items-center h-[580px] z-10 cursor-pointer">
-        {/* Main Horizontal Line */}
-        <div className="absolute top-1/2 -translate-y-1/2 left-0 w-full h-[2px] z-0" style={{ background: 'rgba(16, 185, 129, 0.25)' }} />
+const Experience = () => {
+  const listRef = useRef(null)
+  const { scrollYProgress } = useScroll({ target: listRef, offset: ['start 70%', 'end 60%'] })
+  const fill = useSpring(scrollYProgress, { stiffness: 120, damping: 30 })
 
-        {/* The Marquee Track seamlessly translating by -50% comprising two exact halves */}
-        <div className="flex w-max animate-marquee h-full">
-          {/* First loop (loop 0) */}
-          <div className="flex gap-16 md:gap-24 pr-16 md:pr-24 items-center h-full">
-            {experiences.map((item, index) => (
-              <TimelineCard key={"first" + index} item={item} index={index} globalIndex={0 * experiences.length + index} />
-            ))}
-          </div>
-          {/* Second identical loop (loop 1) */}
-          <div className="flex gap-16 md:gap-24 pr-16 md:pr-24 items-center h-full">
-            {experiences.map((item, index) => (
-              <TimelineCard key={"second" + index} item={item} index={index} globalIndex={1 * experiences.length + index} />
-            ))}
-          </div>
+  return (
+    <section id="experience" className="chapter impact" aria-labelledby="experience-title">
+      <div className="wrap">
+        <SectionLabel num="04" title="Experience" aside={`${experiences.length} roles · industry, research & leadership`} />
+
+        <div className="impact-heading">
+          <RevealLines id="experience-title" className="h2" lines={[<>The work,</>, <>in <em>production.</em></>]} />
+          <Reveal delay={0.1}>
+            <p className="body" style={{ maxWidth: 400 }}>
+              Research at IIT (ISM), a production portal at BCCL and a tech-lead role — systems and models that real
+              people and organisations depend on.
+            </p>
+          </Reveal>
+        </div>
+
+        <div className="impact-numbers">
+          {impactNumbers.map((n, i) => {
+            const { num, suffix } = splitValue(n.value)
+            return (
+              <Reveal key={n.title} delay={i * 0.12}>
+                <strong>
+                  {num}
+                  <span className="accent">{suffix}</span>
+                </strong>
+                <h3>{n.title}</h3>
+                <p>{n.text}</p>
+              </Reveal>
+            )
+          })}
+        </div>
+
+        <div className="exp-list" ref={listRef}>
+          <span className="exp-rail" aria-hidden="true">
+            <motion.span className="exp-rail-fill" style={{ scaleY: fill }} />
+          </span>
+          {experiences.map((exp, i) => (
+            <ExpRow key={`${exp.company}-${exp.role}`} exp={exp} index={i} />
+          ))}
         </div>
       </div>
-
-      <div className="mt-8 text-center text-gray-400 opacity-60 z-10">
-        <span className="text-[10px] md:text-xs font-code tracking-widest uppercase animate-pulse">
-          Hover to pause and read
-        </span>
-      </div>
-
-    </div>
+    </section>
   )
 }
 
-export default SectionWrapper(Experience, 'experience')
+export default Experience

@@ -1,229 +1,180 @@
-import { useRef, useState, useEffect, lazy, Suspense } from 'react'
-import { motion } from 'framer-motion'
-import { ChevronDown, Download } from 'lucide-react'
-import { FaGithub, FaLinkedin } from 'react-icons/fa'
-import { SiLeetcode } from 'react-icons/si'
-import { personalInfo, typingTexts, socialLinks } from '@/constants'
-import Button from '@/components/Button'
+import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
+import { ArrowDown, ArrowUpRight } from 'lucide-react'
+import { personalInfo, roles } from '@/constants'
+import { useMotion } from '@/context/MotionContext'
+import { RevealLines } from '@/components/Reveal'
+import { handleAnchor } from '@/utils/scroll'
 
-const HeroCanvas = lazy(() => import('@/canvas/HeroCanvas'))
+const EASE = [0.22, 1, 0.36, 1]
 
-const iconMap = { FaGithub, FaLinkedin, SiLeetcode }
+const fadeUp = (delay) => ({
+  initial: { opacity: 0, y: 18 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.9, delay, ease: EASE },
+})
 
-const TypingText = () => {
-  const [textIndex, setTextIndex] = useState(0)
-  const [charIndex, setCharIndex] = useState(0)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [displayText, setDisplayText] = useState('')
+// Slow-turning orbital linework behind the hero — pure SVG, no WebGL.
+const Orbits = () => (
+  <div className="hero-orbits" aria-hidden="true">
+    <svg viewBox="0 0 600 600" fill="none">
+      <g className="orbit-spin">
+        <circle cx="300" cy="300" r="290" stroke="var(--line)" />
+        <circle cx="300" cy="300" r="214" stroke="var(--line)" strokeDasharray="2 7" />
+        <circle cx="590" cy="300" r="4" fill="var(--accent)" />
+        <circle cx="86" cy="300" r="3" fill="var(--muted)" />
+      </g>
+      <g className="orbit-spin rev">
+        <ellipse cx="300" cy="300" rx="250" ry="120" stroke="var(--line-strong)" transform="rotate(-28 300 300)" />
+        <ellipse cx="300" cy="300" rx="250" ry="120" stroke="var(--line)" transform="rotate(32 300 300)" />
+        <circle cx="300" cy="180" r="3.5" fill="var(--ink)" transform="rotate(-28 300 300)" />
+      </g>
+      <circle cx="300" cy="300" r="120" stroke="var(--line)" />
+      <path d="M300 280v40M280 300h40" stroke="var(--accent)" />
+    </svg>
+  </div>
+)
 
+// Cycles through the roles Priyanshu is targeting, with a masked vertical slide.
+const RoleRotator = () => {
+  const [i, setI] = useState(0)
+  const { reducedMotion } = useMotion()
   useEffect(() => {
-    let timeout
-    const currentText = typingTexts[textIndex]
-
-    if (!isDeleting && charIndex < currentText.length) {
-      timeout = setTimeout(() => {
-        setDisplayText(currentText.slice(0, charIndex + 1))
-        setCharIndex(charIndex + 1)
-      }, 80)
-    } else if (!isDeleting && charIndex === currentText.length) {
-      timeout = setTimeout(() => setIsDeleting(true), 2000)
-    } else if (isDeleting && charIndex > 0) {
-      timeout = setTimeout(() => {
-        setDisplayText(currentText.slice(0, charIndex - 1))
-        setCharIndex(charIndex - 1)
-      }, 40)
-    } else if (isDeleting && charIndex === 0) {
-      setIsDeleting(false)
-      setTextIndex((prev) => (prev + 1) % typingTexts.length)
-      timeout = setTimeout(() => {}, 500)
-    }
-
-    return () => clearTimeout(timeout)
-  }, [charIndex, isDeleting, textIndex])
-
+    if (reducedMotion) return undefined
+    const id = setInterval(() => setI((n) => (n + 1) % roles.length), 2600)
+    return () => clearInterval(id)
+  }, [reducedMotion])
   return (
-    <div className="flex items-center gap-1 h-10">
-      <span
-        className="text-2xl md:text-3xl font-semibold"
-        style={{ color: 'var(--accent-light)' }}
-      >
-        {displayText}
-      </span>
-      <span
-        className="cursor-blink text-2xl md:text-3xl font-light"
-        style={{ color: 'var(--accent)' }}
-      >
-        |
-      </span>
-    </div>
+    <span className="role-rotator" aria-label={roles.join(', ')}>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={roles[i]}
+          aria-hidden="true"
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: '0%', opacity: 1 }}
+          exit={{ y: '-100%', opacity: 0 }}
+          transition={{ duration: 0.6, ease: EASE }}
+        >
+          {roles[i]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
   )
 }
 
-const staggerVariants = {
-  initial: {},
-  animate: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
-}
-
-const itemVariant = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
-}
-
 const Hero = () => {
-  const mouse = useRef({ x: 0, y: 0 })
-
-  const handleMouseMove = (e) => {
-    mouse.current = {
-      x: (e.clientX / window.innerWidth - 0.5) * 2,
-      y: (e.clientY / window.innerHeight - 0.5) * 2,
-    }
-  }
-
-  const scrollTo = (id) => {
-    const el = document.getElementById(id)
-    if (el) {
-      if (window.__lenis) {
-        window.__lenis.scrollTo(el)
-      } else {
-        el.scrollIntoView({ behavior: 'smooth' })
-      }
-    }
-  }
+  const ref = useRef(null)
+  const [showColor, setShowColor] = useState(false) // tap toggle for touch devices
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
+  const imgY = useTransform(scrollYProgress, [0, 1], ['0%', '-4%'])
+  const frameY = useTransform(scrollYProgress, [0, 1], [0, -60])
 
   return (
-    <section
-      id="home"
-      className="relative min-h-screen flex items-center overflow-hidden"
-      onMouseMove={handleMouseMove}
-    >
-      {/* Starfield background */}
-      <Suspense fallback={null}>
-        <HeroCanvas mouse={mouse} />
-      </Suspense>
+    <section id="top" ref={ref} className="hero" aria-labelledby="hero-title">
+      <div className="hero-backdrop" />
+      <Orbits />
 
-      {/* Global Dotted Background Layer for Uniformity */}
-      <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-screen z-0" style={{ backgroundImage: 'radial-gradient(circle at center, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-
-      {/* Gradient overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.12) 0%, transparent 60%)',
-        }}
-      />
-
-      <div className="max-w-7xl mx-auto px-6 w-full grid grid-cols-1 md:grid-cols-[55%_45%] gap-8 items-center py-24 md:py-0 relative z-10">
-        {/* Left: Text content */}
-        <motion.div
-          variants={staggerVariants}
-          initial="initial"
-          animate="animate"
-          className="flex flex-col gap-5 md:pl-16 z-10"
-        >
-          {/* Heading */}
-          <motion.div variants={itemVariant} className="flex flex-col gap-2">
-            <h2 className="text-3xl md:text-5xl font-bold" style={{ color: '#10B981' }}>
-              Hello, I'm
-            </h2>
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
-              {personalInfo.name}
-            </h1>
-            
-            {/* Typewriter Animation Loop */}
-            <div className="mt-1 md:mt-2">
-              <TypingText />
-            </div>
-          </motion.div>
-
-          {/* Description */}
-          <motion.p
-            variants={itemVariant}
-            className="text-sm md:text-base max-w-xl leading-relaxed mt-2"
-            style={{ color: 'var(--text-secondary)' }}
-          >
-             I turn complex ideas into seamless, high-impact web experiences — building modern, scalable, and lightning-fast applications that make a difference.
-          </motion.p>
-
-          {/* Buttons */}
-          <motion.div variants={itemVariant} className="flex flex-wrap gap-3 mt-4">
-            <button 
-              onClick={() => scrollTo('projects')} 
-              className="px-6 py-2 rounded-full text-xs font-semibold text-white tracking-wide transition-all duration-300 hover:scale-105 hover:shadow-lg whitespace-nowrap" 
-              style={{ background: 'linear-gradient(90deg, #10B981, #0EA5E9)', boxShadow: '0 2px 12px rgba(16, 185, 129, 0.3)' }}
-            >
-              View My Work
-            </button>
-            <a 
-              href={personalInfo.resumeUrl} 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 hover:scale-105 whitespace-nowrap"
-              style={{ color: 'var(--text-primary)', border: '1.5px solid var(--text-tertiary)', background: 'var(--bg-secondary)' }}
-            >
-              My Resume
-            </a>
-          </motion.div>
-
-          {/* Social Links */}
-          <motion.div variants={itemVariant} className="flex items-center gap-6 mt-6">
-            {socialLinks.map(({ name, url, icon, hoverColor }) => {
-              const Icon = iconMap[icon] || FaGithub
-              return (
-                <a
-                  key={name}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={name}
-                  className="transition-all duration-300 hover:scale-125"
-                  style={{ color: 'var(--text-secondary)' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = hoverColor)}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
-                >
-                  <Icon size={22} />
-                </a>
-              )
-            })}
-          </motion.div>
+      <div className="wrap" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+        <motion.div className="hero-topline" {...fadeUp(0.1)}>
+          <span className="label">
+            <span style={{ color: 'var(--ink)' }}>Software.</span> AI/ML. Data. Open source.
+          </span>
+          <span className="label hide-sm">Based in {personalInfo.city}</span>
         </motion.div>
 
-        {/* Right: Robot Image Decoration */}
-        <motion.div
-           initial={{ opacity: 0, x: 50 }}
-           animate={{ opacity: 1, x: 0 }}
-           transition={{ delay: 0.4, duration: 1 }}
-           className="hidden md:flex items-center justify-center relative w-full h-full"
-        >
-          {/* Backlight glow matching screenshot */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full opacity-20 blur-[100px] pointer-events-none" style={{ background: '#10B981' }} />
-          
-          <motion.img 
-            animate={{ y: [-15, 15, -15] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            src="/assets/robot-avatar.png" 
-            alt="3D Robot Avatar" 
-            className="w-[90%] max-w-[550px] object-contain drop-shadow-[0_0_40px_rgba(16,185,129,0.15)] z-10 relative"
-          />
+        <div className="hero-grid">
+          <div>
+            <motion.div className="hero-kicker" {...fadeUp(0.2)}>
+              <span className="tiny-cross" aria-hidden="true">+</span>
+              <RoleRotator />
+              <span className="label hide-sm">· {personalInfo.college}</span>
+            </motion.div>
+
+            <RevealLines
+              as="h1"
+              id="hero-title"
+              className="display hero-name"
+              animateOnMount
+              delay={0.25}
+              stagger={0.12}
+              lines={[
+                <>{personalInfo.firstName}</>,
+                <>
+                  {personalInfo.middleName} <em>{personalInfo.lastName}</em>
+                  <span className="accent-dot">.</span>
+                </>,
+              ]}
+            />
+
+            <motion.p className="lead hero-description" {...fadeUp(0.65)}>
+              {personalInfo.heroIntro}
+            </motion.p>
+
+            <motion.div className="hero-ctas" {...fadeUp(0.78)}>
+              <a href="#work" onClick={handleAnchor('work')} className="btn btn-primary btn-down">
+                Explore my work <ArrowDown size={16} />
+              </a>
+              <a href="#contact" onClick={handleAnchor('contact')} className="btn btn-ghost">
+                Start a conversation <ArrowUpRight size={16} />
+              </a>
+            </motion.div>
+          </div>
+
+          <motion.figure
+            className="hero-portrait"
+            style={{ y: frameY, margin: 0 }}
+            initial={{ opacity: 0, scale: 0.94, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 1.3, delay: 0.35, ease: EASE }}
+          >
+            <div className="portrait-stage">
+              <span className="portrait-glow" aria-hidden="true" />
+              <motion.div
+                className={`portrait-figure ${showColor ? 'is-color' : ''}`}
+                style={{ y: imgY }}
+                onClick={() => setShowColor((c) => !c)}
+              >
+                <img
+                  className="portrait-cutout bw"
+                  src="/assets/priyanshu-photo-bw.webp"
+                  alt={`Portrait of ${personalInfo.name}`}
+                  width="918"
+                  height="1086"
+                  fetchpriority="high"
+                />
+                <img
+                  className="portrait-cutout color"
+                  src="/assets/priyanshu-photo.webp"
+                  alt=""
+                  aria-hidden="true"
+                  width="918"
+                  height="1086"
+                  loading="lazy"
+                />
+              </motion.div>
+              <figcaption className="portrait-caption">
+                <span className="live-dot" />
+                <span className="label-sm">{personalInfo.currentRole}</span>
+              </figcaption>
+            </div>
+            <div className="portrait-meta">
+              <span className="label-sm">
+                <span className="coordinate-line" />
+                23.41° N, 85.44° E
+              </span>
+              <span className="label-sm">CGPA {personalInfo.cgpa}</span>
+            </div>
+          </motion.figure>
+        </div>
+
+        <motion.div className="hero-bottom" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 1.1 }}>
+          <a href="#about" onClick={handleAnchor('about')} className="scroll-cue label">
+            <span className="scroll-line" aria-hidden="true" />
+            Scroll to discover
+          </a>
+          <span className="label hero-status"><span className="live-dot" /> {personalInfo.availability}</span>
         </motion.div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.button
-        onClick={() => scrollTo('about')}
-        animate={{ y: [0, 8, 0] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 p-2 rounded-full border transition-colors duration-200"
-        style={{
-          borderColor: 'var(--border-accent)',
-          color: 'var(--accent)',
-          background: 'rgba(124,58,237,0.05)',
-        }}
-      >
-        <ChevronDown size={24} />
-      </motion.button>
-
-
     </section>
   )
 }

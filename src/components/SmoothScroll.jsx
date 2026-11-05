@@ -1,37 +1,34 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import Lenis from 'lenis'
+import { useMotion } from '@/context/MotionContext'
 
+// Lenis smooth scrolling — disabled entirely when motion is reduced.
 const SmoothScroll = ({ children }) => {
-  const lenisRef = useRef(null)
+  const { reducedMotion } = useMotion()
 
   useEffect(() => {
+    if (reducedMotion) return undefined
+
     const lenis = new Lenis({
-      duration: 1.2,          // scroll duration (higher = smoother/slower)
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // easeOutExpo
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
     })
-
-    lenisRef.current = lenis
-
-    // Expose lenis instance globally so other components can use it
     window.__lenis = lenis
 
-    function raf(time) {
+    let frame
+    const raf = (time) => {
       lenis.raf(time)
-      requestAnimationFrame(raf)
+      frame = requestAnimationFrame(raf)
     }
-
-    requestAnimationFrame(raf)
+    frame = requestAnimationFrame(raf)
 
     return () => {
+      cancelAnimationFrame(frame)
       lenis.destroy()
       window.__lenis = null
     }
-  }, [])
+  }, [reducedMotion])
 
   return children
 }
